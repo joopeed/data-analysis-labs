@@ -4,6 +4,8 @@ dados$laboratorio <- gsub("lccpeer@xmpp.ourgrid.org", "LCC1", dados$laboratorio)
 dados$laboratorio <- gsub("peer-lcc2@xmpp.ourgrid.org", "LCC2", dados$laboratorio)
 dados$laboratorio <- gsub("gaita@gaita.gmf.ufcg.edu.br", "SPLab", dados$laboratorio)
 dados$laboratorio <- gsub("peer-lsd@xmpp.ourgrid.org", "LSD", dados$laboratorio)
+//Removendo outliers
+dados <- dados[which(intervalo < 1000000), ]
 //Quantidade de intervalos por laboratorio
 table(dados$laboratorio)
 //Quantidade de intervalos por maquina
@@ -19,7 +21,7 @@ maqo <- table(dados_ociosos$maquina)
 maqo[order(maqo, decreasing=TRUE)]
 summary(dados_ociosos)
 //Vendo os outliers mais drasticos
-dados_ociosos[which(intervalo > 2000000), ]
+dados_ociosos[which(intervalo > 1000000), ]
 // 45 dias seguidos de trabalho 
 // 12410   3960692   TRUE       gato_1.lsd.ufcg.edu.br@xmpp.ourgrid.org         LSD
 
@@ -36,3 +38,14 @@ prop.table(table(dados$laboratorio))
 tempos_por_lab <- ddply(dados, c("laboratorio", "ociosa"), summarize, sum=sum(intervalo))
 // Vendo a proporcao de status ocioso por laboratorio
 ggplot(tempos_por_lab, aes(laboratorio, sum,  fill=ociosa)) + geom_bar(stat="identity")
+//Vendo a quantidade de tempo total de ociosidade por maquina
+somas_por_maquina <- tapply(dados_ociosos$intervalo, dados_ociosos$maquina, sum)
+ordem <- order(somas_por_maquina, decreasing=TRUE)
+somas_por_maquina[ordem]
+//Vendo a proporção total de trabalho por laboratorio nos dados
+somas_por_lab <- sort(tapply(dados_ociosos$intervalo, dados_ociosos$laboratorio, sum))
+sort(tapply(dados_ociosos$intervalo, dados_ociosos$laboratorio, median))
+ggplot(tempos_por_lab, aes(ociosa, sum,  fill=laboratorio)) + geom_bar(stat="identity")
+
+ociosidade <- ddply(dados, c("ociosa"), summarize, sum=sum(intervalo))
+ggplot(ociosidade, aes(ociosa, sum,  fill=ociosa)) + geom_bar(stat="identity")
