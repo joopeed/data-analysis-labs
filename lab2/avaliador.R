@@ -1,8 +1,9 @@
-dados <- read.table("C:\\atividade-maquinas-dsc.txt", header=TRUE)
+args <- commandArgs(trailingOnly = TRUE)
+dados <- read.table(args[1], header=TRUE)
 attach(dados)
-# Removendo alguns outliers
-#dados <- dados[which(intervalo < 1000000), ]
-#dados <- subset(dados, ociosa==TRUE)
+//Range rule of thumb
+dados <- dados[which(intervalo < media + 2*desvio),]
+dados <- dados[which(intervalo > media - 2*desvio),]
 
 # Inserindo uma coluna com as volatilidades das maquinas
 volatilidades <- table(dados$maquina)
@@ -28,5 +29,30 @@ percentil55_vol <- quantile(volatilidades, c(.55), na.rm=TRUE)
 percentil55_disp <- quantile(disponibilidades, c(.55), na.rm=TRUE)
 
 # Colocando a restricao do desafio, nao sobrou nada :(
-dados <- dados[which(dados$disponibilidade > percentil55_disp && dados$volatilidade < percentil55_vol)]
+dados <- dados[which(dados$disponibilidade > percentil55_disp),]
+dados <- dados[which(dados$volatilidade < percentil55_vol),]
 
+media_filtrada_vol <- mean(dados$volatilidade)
+mediana_filtrada_vol <- median(dados$volatilidade)
+media_filtrada_disp <- mean(dados$disponibilidade)
+mediana_filtrada_disp <- median(dados$disponibilidade)
+
+dados <- dados[order(dados$disponibilidade, decreasing=TRUE),]
+mais_disponivel <- dados[1,]
+
+porcentagem_media_disponivel <- 100/media_filtrada_disp*mais_disponivel$disponibilidade
+porcentagem_mediana_disponivel <- 100/mediana_filtrada_disp*mais_disponivel$disponibilidade
+porcentagem_media_volatilidade <- 100/media_filtrada_vol*mais_disponivel$volatilidade
+porcentagem_mediana_volatilidade <- 100/mediana_filtrada_vol*mais_disponivel$volatilidade
+
+sink("maquina_escolhida.txt")
+cat(mais_disponivel$maquina) 
+cat("Porcentagem de mais disponivel que a media ")
+cat(porcentagem_media_disponivel)
+cat("Porcentagem de mais disponivel que a mediana ")
+cat(porcentagem_mediana_disponivel)
+cat("Porcentagem de mais volatil que a media ")
+cat(porcentagem_media_volatilidade)
+cat("Porcentagem de mais volatil que a mediana ")
+cat(porcentagem_mediana_volatilidade)
+sink()

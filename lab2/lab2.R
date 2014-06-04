@@ -1,17 +1,20 @@
-dados <- read.table("atividade-maquinas-dsc.txt", header=TRUE)
+dados <- read.table("C:\\atividade-maquinas-dsc.txt", header=TRUE)
+install.packages("e1071")
 //Trocando nomes dos laboratorios
 dados$laboratorio <- gsub("lccpeer@xmpp.ourgrid.org", "LCC1", dados$laboratorio)
 dados$laboratorio <- gsub("peer-lcc2@xmpp.ourgrid.org", "LCC2", dados$laboratorio)
 dados$laboratorio <- gsub("gaita@gaita.gmf.ufcg.edu.br", "SPLab", dados$laboratorio)
 dados$laboratorio <- gsub("peer-lsd@xmpp.ourgrid.org", "LSD", dados$laboratorio)
 //Removendo outliers
-dados <- dados[which(intervalo < 1000000), ]
+media <- mean(dados$intervalo)
+desvio <- sd(dados$intervalo)
+dados <- dados[which(intervalo < media + 2*desvio),]
 //Quantidade de intervalos por laboratorio
 table(dados$laboratorio)
 //Quantidade de intervalos por maquina
 maq <- table(dados$maquina)
 //Maquinas com mais dados
-maq[order(maq, decreasing=TRUE)]
+maq[order(maq, decreasing=TtRUE)]
 //Separando dados sobre maquinas ociosas
 dados_ociosos <- subset(dados, ociosa==TRUE)
 // e nao ociosas
@@ -20,8 +23,6 @@ dados_nao_ociosos <- subset(dados, ociosa==FALSE)
 maqo <- table(dados_ociosos$maquina)
 maqo[order(maqo, decreasing=TRUE)]
 summary(dados_ociosos)
-//Vendo os outliers mais drasticos
-dados_ociosos[which(intervalo > 1000000), ]
 // 45 dias seguidos de trabalho 
 // 12410   3960692   TRUE       gato_1.lsd.ufcg.edu.br@xmpp.ourgrid.org         LSD
 
@@ -49,3 +50,20 @@ ggplot(tempos_por_lab, aes(ociosa, sum,  fill=laboratorio)) + geom_bar(stat="ide
 
 ociosidade <- ddply(dados, c("ociosa"), summarize, sum=sum(intervalo))
 ggplot(ociosidade, aes(ociosa, sum,  fill=ociosa)) + geom_bar(stat="identity")
+
+ddply(dados, c("ociosa"), summarize, median=median(intervalo))
+ddply(dados, c("ociosa"), summarize, mode=mode(intervalo))
+ddply(dados, c("ociosa"), summarize, mean=mean(intervalo))
+
+
+quantile(dados_ociosos$intervalo, c(.25), na.rm=TRUE)
+quantile(dados_nao_ociosos$intervalo, c(.25), na.rm=TRUE)
+quantile(dados_nao_ociosos$intervalo, c(.75), na.rm=TRUE)
+quantile(dados_ociosos$intervalo, c(.75), na.rm=TRUE)
+
+sd(dados_ociosos$intervalo)
+sd(dados_nao_ociosos$intervalo)
+
+library(e1071)
+skewness(dados$intervalo)
+kurtosis(dados$intervalo)
