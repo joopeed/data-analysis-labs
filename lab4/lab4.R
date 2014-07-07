@@ -72,3 +72,11 @@ qqnorm(dados_pb[which(provedor == "GZT"),]$velocidade)
 mm <- ci_by_group(dados_pb, measurevar="velocidade", groupvars="provedor")
 ggplot(mm, aes(x = dia_semana, y = mean, fill=dia_semana)) + geom_bar(position=position_dodge(.9), stat = "identity", width=.5)  + geom_errorbar(aes(ymin=mean-ci, ymax=mean+ci),width=.2,position=position_dodge(.3)) 
 
+shapiro.test(dados_pb$velocidade)
+library(nortest)
+ad.test(dados_pb$velocidade)
+library(lawstat)
+bartlett.test(dados_pb$velocidade, dados_pb$provedor)
+levene.test(dados_pb$velocidade, dados_pb$provedor)
+
+t.test(dados_pb[which(provedor == "GZT"),]$velocidade, dados_pb[which(provedor == "Ola"),]$velocidade, paired=F, var.equal=T, alternative="less")
