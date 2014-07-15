@@ -79,4 +79,34 @@ library(lawstat)
 bartlett.test(dados_pb$velocidade, dados_pb$provedor)
 levene.test(dados_pb$velocidade, dados_pb$provedor)
 
+
 t.test(dados_pb[which(provedor == "GZT"),]$velocidade, dados_pb[which(provedor == "Ola"),]$velocidade, paired=F, var.equal=T, alternative="less")
+
+t.test(dados_pb[which(provedor == "GZT"),]$velocidade, paired=F, var.equal=T, alternative="less", mu = 50)
+
+t.test(dados_pb[which(provedor == "Ola"),]$velocidade, paired=F, var.equal=T, alternative="less", mu = 50)
+
+gzt <- dados[which(provedor == "GZT"),]
+dados_rj <- dados[which(estado == "RJ"),]
+qqnorm(dados_rj$velocidade)
+dados_sp <- dados[which(estado == "SP"),]
+qqnorm(dados_sp$velocidade)
+shapiro.test(dados_rj$velocidade)
+ad.test(dados_rj$velocidade)
+shapiro.test(dados_sp$velocidade)
+ad.test(dados_sp$velocidade)
+bartlett.test(gzt$velocidade, gzt$estado)
+levene.test(gzt$velocidade, gzt$estado)
+attach(gzt)
+boxplot(velocidade ~ estado)
+oneway.test(velocidade ~ estado, var.equal=TRUE)
+
+mm <- ci_by_group(gzt, measurevar="velocidade", groupvars="estado")
+ggplot(mm, aes(x = estado, y = mean, fill=estado)) + geom_bar(position=position_dodge(.9), stat = "identity", width=.5)  + geom_errorbar(aes(ymin=mean-ci, ymax=mean+ci),width=.2,position=position_dodge(.3)) 
+
+t.test(gzt[which(estado == "PB"),]$velocidade, gzt[which(estado == "RJ"),]$velocidade, paired=F, var.equal=T, alternative="less")
+t.test(gzt[which(estado == "PB"),]$velocidade, gzt[which(estado == "RJ"),]$velocidade, paired=F, var.equal=T, alternative="less")
+t.test(gzt[which(estado == "SP"),]$velocidade, gzt[which(estado == "RJ"),]$velocidade, paired=F, var.equal=T, alternative="less")
+t.test(gzt[which(estado == "SP"),]$velocidade, gzt[which(estado == "PB"),]$velocidade, paired=F, var.equal=T, alternative="less")
+t.test(gzt[which(estado == "PB"),]$velocidade, gzt[which(estado == "PB"),]$velocidade, paired=F, var.equal=T, alternative="less")
+
